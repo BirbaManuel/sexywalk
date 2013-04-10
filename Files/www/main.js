@@ -12,7 +12,8 @@ var contenuFichierText ;
 var nomfichiertext = "Manueltest" + '.txt';
 var cpt =0;
 
-
+var _file = undefined;
+var _writer = undefined;
 
 function onSuccess(acceleration) {
     
@@ -56,11 +57,12 @@ function onSuccess(acceleration) {
     
     
     contenuFichierText = un;
-  
-
-    writeFile();
-    
-    
+    if (_writer) {
+    _writer.seek(writer.length);      
+    _writer.write(" " + contenuFichierText);
+    } else {
+         writeFile();
+    }
 }
 
 function onError() {
@@ -217,6 +219,7 @@ function writeFile() {
 }
 
 function onGetFileSuccess(theFile) {
+    _File = theFile;
   //alert("function onGetFileSuccess ok: nous avons pu créer le fichier système : " + theFile.name);
   theFile.createWriter(onCreateWriterSuccess, onFileError);
 }
