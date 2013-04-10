@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Acceleration Example</title>
+        
+        <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+                
+                <link rel="stylesheet"  href="css/themes/default/jquery.mobile-1.2.0.css" />
+                <script src="js/jquery.js"></script>
+                <script src="js/jquery.mobile-1.2.0.js"></script>
+        <script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
+        <script type="text/javascript" charset="utf-8">
+            // The watch id references the current `watchAcceleration`
+            var watchID = null;
+            
+            // Wait for PhoneGap to load
+            
+            function onLoad() {
+            document.addEventListener("deviceready", onDeviceReady, false);
+            }
+            
+            // PhoneGap is ready
+            //
+           function onDeviceReady() {
+                alert('Let me see some sexy walk right now !!!');
+               windows.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onSuccess, onError);
+               
+               function getLocalFileSysteme(fileSystem){
+                   console.log(fileSystem.name);
+               }
+                
+                function myTimer()
+                {
+                    
+                    alert("le timer est actif");
+                    insert(tx);
+                    
+                }
+                function myStopFunction()
+                {
+                    clearInterval(myVar);
+                }
+               
+                var db = window.openDatabase("test1", "1.0", "accéléromètre", 500000);
+                db.transaction(insertvalue, errorDB, successDB);
+                db.transaction(insert, errorDB, successDB);
+                
+                self.db = db;
+                
+                //setInterval(function(){insert(tx)},500);
+            }
+            
+            // Start watching the acceleration
+            //
+            function startWatch() {
+                
+                // Update acceleration every 3 seconds == "frequency: 3000"
+                var options = { frequency: 500 };
+                
+                watchID = navigator.accelerometer.watchAcceleration(onSuccess, onError, options);
+            }
+            
+            // Stop watching the acceleration
+            //
+            function stopWatch() {
+                if (watchID) {
+                    navigator.accelerometer.clearWatch(watchID);
+                    watchID = null;
+                }
+            }
+            
+            // onSuccess: Get a snapshot of the current acceleration
+            //
+            function onSuccess(acceleration) {
+                //alert("view de onSuccess");
+                
+                var element = document.getElementById('accelerometer');
+                element.innerHTML =
+                'Acceleration X: ' + acceleration.x + '<br />' +
+                'Acceleration Y: ' + acceleration.y + '<br />' +
+                'Acceleration Z: ' + acceleration.z + '<br />' +
+                'Timestamp: '      + acceleration.timestamp + '<br />'
+                
+                
+                
+                self.db.transaction(function(tx){
+                                    try
+                                    { tx.executeSql('INSERT INTO test1 (AccX, AccY, AccZ, Timestamp) VALUES ('+acceleration.x+', '+acceleration.y+','+acceleration.z+','+acceleration.timestamp+')');
+                                    
+                                    }
+                                    catch(e){
+                                    alert(e.message);
+                                    }
+                                    
+                                    }, onError, successDB);
+            }
+            
+            // onError: Failed to get the acceleration
+            //
+            function onError() {
+                alert('onError!');
+            }
+                        // *******************************Partie du code pour la remplir la base de données*******************************
+                    
+            function insertvalue(tx) {
+                tx.executeSql('DROP TABLE IF EXISTS test1'); // éfface la table "test1" si elle existe.
+                tx.executeSql('CREATE TABLE IF NOT EXISTS test1 (AccX, AccY, AccZ,  Timestamp)');
+                tx.executeSql('INSERT INTO test1 (AccX, AccY, AccZ, Timestamp) VALUES ("myX", "myY", "myZ", "myTimestamp")');
+                
+            }function insert(tx) {
+                tx.executeSql('INSERT INTO test1 (AccX, AccY, AccZ, Timestamp) VALUES ("yo", "yi", "yu", "ya")');
+                
+            }
+            
+            
+            function queryDB(tx) {
+                tx.executeSql('SELECT * FROM test1', [], querySuccess, errorDB);
+            }
+            
+            // Query the success callback
+            //
+            function querySuccess(tx, results) {
+                //first get the number of rows in the result set
+                var len = results.rows.length;
+                var status = document.getElementById("status");
+                var string = "nombre de lignes: " +len+"<br/>";
+                //var string = "
+                
+                for (var i=0;i<len;i++){
+                    string  += results.rows.item(i).AccX + "; " + results.rows.item(i).AccY + "; " + results.rows.item(i).AccZ + "; " + results.rows.item(i).Timestamp + "<br/>";
+                }
+                
+                status.innerHTML = string;
+            }
+            
+            
+            function errorDB(err) {
+                alert("Error processing SQL: "+err.code);
+            }
+            
+            function successDB() {
+                
+                self.db.transaction(queryDB, errorDB);
+            
+            }
+</script>
+        
+        
+            </head>
+    
+    <body onload="onLoad()">
+        <p id="props">Loading device properties ...</p>
+    <body>
+    <body>
+        
+        <div data-role=page>
+            <div data-role=header>
+                <h1>SexyWalk V.1.0</h1>
+            </div>
+            
+        <div data-role=content>
+            <div id="accelerometer">Bienvenue sur l'application SexyWalk!</div>
+            
+            <button onclick="startWatch();">Start Watching</button>
+            <button onclick="stopWatch();">Stop Watching</button>
+            <button onclick="getLocalFileSysteme;">fileSystem</button>
+        </div>    
+            
+        <div data-role=footer>
+            <p> observation table base de donnees </p>
+            <p> <div id='status'></div> </p>
+            
+        </div>
+        </div>
+    
+    </body>
+</html>
