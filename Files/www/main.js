@@ -12,8 +12,74 @@ var contenuFichierText ;
 var nomfichiertext = "Manueltest" + '.txt';
 var cpt =0;
 
-var _file = undefined;
 var _writer = undefined;
+
+/**
+ * @class Writer
+ * @param String filename
+ */
+
+function Writer(filename) {
+    this.fileName = fileName;
+    this.writer = undefined;
+}
+
+/**
+ * @function openFile
+ * @param unknown fileSystemType
+ * @param function callback this function will be called once the writer is ready
+ * @return callback(Writer);
+ */
+Writer.prototype.openFile = function(fileSystemType, callback) {
+    var me = this;
+    
+    /**
+     * request for a handle on fileSystem
+     */
+    window.requestFileSystem(fileSystemType, 1024 * 1024, function(fs) {
+        me.fileSystem = fs;
+        
+        /**
+         * Once the file system handle is here, open  the file
+         */
+        fs.root.getFile(me.fileName, {
+            create : true
+        }, 
+        function(theFile) {  
+            /**
+             * then create the writer
+             */
+            theFile.createWriter(function(writer) {
+                me.writer = writer;
+               /**
+                * execute the callback function passed in params
+                */
+                callback(me);
+            }, 
+            function() {
+                console.log('error in writer creation');
+            });
+        }, 
+        function() {
+            console.log('error in getFile');
+        });
+    }, 
+    function() {
+        console.log('error in requestFileSystem');
+    });
+}
+
+/**
+ * @function write
+ * @param string content
+ * 
+ */
+Writer.prototype.writeLn = function(content) {
+    var me = this;
+    me.writer.seek(me.writer.length);      
+    me.writer.write(content+'\n');
+}
+
 
 function onSuccess(acceleration) {
     
@@ -57,11 +123,19 @@ function onSuccess(acceleration) {
     
     
     contenuFichierText = un;
-    if (_writer) {
-    _writer.seek(writer.length);      
-    _writer.write(" " + contenuFichierText);
+    /**
+     * if the writer is not set, we initialize it, then write the content inside,
+     */
+    if (_writer === undefined) {
+        _writer = new Writer(nomfichiertext);
+        _writer.openFile(theFileSystem, function(writer){
+            writer.writeLn(contenuFichierText);
+        });
     } else {
-         writeFile();
+        /**
+         * else, write directly at the end of the file.
+         */
+        _writer.writeLn(contenuFichierText);
     }
 }
 
@@ -219,7 +293,6 @@ function writeFile() {
 }
 
 function onGetFileSuccess(theFile) {
-    _File = theFile;
   //alert("function onGetFileSuccess ok: nous avons pu créer le fichier système : " + theFile.name);
   theFile.createWriter(onCreateWriterSuccess, onFileError);
 }
