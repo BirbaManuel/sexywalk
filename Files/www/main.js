@@ -129,7 +129,7 @@ function onSuccess(acceleration) {
     if (_writer === undefined) {
         _writer = new Writer(nomfichiertext);
         _writer.openFile(theFileSystem, function(writer){
-            writer.writeLn(contenuFichierText);
+            writer.writeLn(un);
         });
     } else {
         /**
